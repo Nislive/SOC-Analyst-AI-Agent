@@ -14,7 +14,7 @@ from typing import Literal
 from langgraph.graph import StateGraph, START, END
 from IPython.display import Image, display
 from langchain.messages import HumanMessage
-
+import time
 
 load_dotenv()
 
@@ -133,11 +133,28 @@ agent = agent_builder.compile()
 
 
 
-display(Image(agent.get_graph(xray=True).draw_mermaid_png()))
-with open("graph.png", "wb") as f:
-    f.write(agent.get_graph().draw_mermaid_png())
-    
-messages = [HumanMessage(content="Feb 22 21:10:05 server1 sshd[25341]: Failed password for root from 185.156.177.34 port 45212 ssh2")]
-messages = agent.invoke({"messages": messages}, config={"recursion_limit": 10})
-for m in messages["messages"]:
-    m.pretty_print()
+def start_soc_monitoring(log_file_path):
+    print(f"SOC Agent is active and monitoring: {log_file_path}")
+
+    if not os.path.exists(log_file_path):
+        open(log_file_path, 'w').close()
+
+    with open(log_file_path, "r") as f:
+        f.seek(0, 2)
+        
+        while True:
+            line = f.readline()
+            if not line:
+                time.sleep(0.5)
+                continue
+            
+            log_entry = line.strip()
+            if log_entry:
+                for chunk in agent.stream({"messages": [HumanMessage(content=log_entry)]}, config={"recursion_limit": 15}):
+                    for node, output in chunk.items():
+                        print(f"--- Node: {node} ---")
+                
+
+if __name__ == "__main__":
+    LOG_FILE = "server_logs.txt"
+    start_soc_monitoring(LOG_FILE)
