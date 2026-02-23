@@ -14,7 +14,7 @@ Below is the end-to-end execution flow of the agent. The LangSmith traces demons
 |  1. Benign Analysis |  2. Malicious Analysis |  3. Server/DB Logs |  4. Threat Alert |
 | :---: | :---: | :---: | :---: |
 | **Safe Path** | **Threat Path** | **Input Source** | **Response Output** |
-| ![](images/images-2.png) | ![](images/images-3.png) | ![](images/image-4.png) | ![](images/images-1.jpeg) |
+| ![](images/image-4.png) | ![](images/image-3.png) | ![](images/image-2.png) | ![](images/images-1.jpeg) |
 | *LangSmith trace showing immediate termination for safe logs.* | *LangSmith trace showing research and tool execution.* | *MySQL Database view of recorded security incidents.* | *Instant notification sent to the admin via Telegram.* |
 
 ---
