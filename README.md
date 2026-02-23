@@ -56,6 +56,7 @@ The administrator receives an instant notification with the attack severity, ana
 * **🔄 Advanced Decision Logic:** Managed by a **LangGraph** state machine to ensure a reliable and traceable analysis flow.
 
 📋 How It Works
+
 Ingestion: The agent monitors server_logs.txt for new entries.
 
 Reasoning: The AI analyst evaluates the log. If it's safe (Benign), the process ends.
