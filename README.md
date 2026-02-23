@@ -45,6 +45,16 @@ The administrator receives an instant notification with the attack severity, ana
 
 *Real-time security alert sent by the AI Agent to the administrator's Telegram.*
 
+## 🏗️ System Architecture & Graph Logic
+
+The agent's decision-making process is built on a **graph-based structure** using LangGraph. This allows for cyclical reasoning, tool execution loops, and state management.
+
+<p align="center">
+  <img src="graph.png" width="400" alt="LangGraph Structure">
+  <br>
+  <i>Visual representation of the Agent's Node and Edge logic.</i>
+</p>
+
 ---
 ## ✨ Key Features
 
