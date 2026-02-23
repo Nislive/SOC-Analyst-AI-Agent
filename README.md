@@ -7,17 +7,45 @@ By leveraging **Llama 3.3 (via Groq)** and **LangGraph**, the system analyzes th
 
 ---
 
-### System Execution & Logic Flow
+## 🧩 System Execution & Logic Flow
 
-Below is the end-to-end execution flow of the agent. The LangSmith traces demonstrate the internal decision-making logic for both benign and malicious scenarios.
+Below is the step-by-step execution flow of the agent, showing how it distinguishes between routine traffic and actual cyber threats.
 
-|  1. Benign Analysis |  2. Malicious Analysis |  3. Server/DB Logs |  4. Threat Alert |
-| :---: | :---: | :---: | :---: |
-| <img src="images/image-4.png" width="225"> | <img src="images/image-3.png" width="225"> | <img src="images/image-2.png" width="225"> | <img src="images/image-1.jpeg" width="225"> |
-| *LangSmith trace showing immediate termination for safe logs.* | *LangSmith trace showing research and tool execution.* | *MySQL Database view of recorded security incidents.* | *Instant notification sent to the admin via Telegram.* |
+###  1. Benign Analysis (Safe Path)
+When the AI Analyst determines a log entry is safe, it terminates the process immediately to save resources and avoid alert fatigue.
+
+<img src="images/image-4.png" width="800" alt="Benign Analysis">
+
+*LangSmith trace showing the decision-making process for a harmless log entry.*
 
 ---
 
+###  2. Malicious Analysis (Threat Path)
+When a threat (SQLi, XSS, etc.) is detected, the agent triggers a deep investigation, searching for IP reputation and payload signatures via Tavily.
+
+<img src="images/image-3.png" width="800" alt="Malicious Analysis">
+
+*LangSmith trace showing the agent conducting research and executing defensive tools.*
+
+---
+
+###  3. Server & Database Logs
+All confirmed threats and their AI-generated forensic summaries are recorded in a structured MySQL database.
+
+<img src="images/image-2.png" width="800" alt="Database Logs">
+
+*MySQL Database view of recorded security incidents and attack details.*
+
+---
+
+###  4. Telegram Threat Alert
+The administrator receives an instant notification with the attack severity, analysis, and recommended actions.
+
+<img src="images/image-1.jpeg" width="400" alt="Telegram Alert">
+
+*Real-time security alert sent by the AI Agent to the administrator's Telegram.*
+
+---
 ## ✨ Key Features
 
 * **🔍 Intelligent Analysis:** Uses Llama 3.3 to understand the intent and severity of log entries.
