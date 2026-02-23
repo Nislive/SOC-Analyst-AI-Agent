@@ -15,6 +15,41 @@ from langgraph.graph import StateGraph, START, END
 from IPython.display import Image, display
 from langchain.messages import HumanMessage
 import time
+import mysql.connector
+
+@tool
+def write_to_database(ip, type_of_attack, summary):
+    """Write ip, type_of_attack and summary about attack to database"""
+    username=os.getenv("mysql_username")
+    password=os.getenv("mysql_password")
+
+    try:
+        mydb=mysql.connector.connect(
+            host="localhost",
+            user=username,
+            password=password
+        )
+        my_cursor = mydb.cursor()
+        my_cursor.execute("CREATE DATABASE IF NOT EXISTS security_logs_db")
+        my_cursor.execute("USE security_logs_db")
+        my_cursor.execute("""CREATE TABLE IF NOT EXISTS attack_logs (
+                        id INT PRIMARY KEY AUTO_INCREMENT,
+                        date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        ip VARCHAR(45),
+                        type_of_attack VARCHAR(45),
+                        summary TEXT
+                        )""")
+        my_cursor.execute("INSERT INTO attack_logs (ip, type_of_attack, summary) VALUES (%s,%s,%s) ", (ip, type_of_attack, summary))
+        mydb.commit()
+        return f"Successfully logged the {type_of_attack} attack from IP {ip} to the database."
+    except Exception as e:
+        return f"Failed to write to database. Error: {str(e)}"
+    finally:
+        if 'mydb' in locals() and mydb.is_connected():
+            my_cursor.close()
+            mydb.close()
+
+
 
 load_dotenv()
 
@@ -64,7 +99,7 @@ def send_security_alert(analysis_report:str):
 
     
 
-tools = [tavily_search_tool, send_security_alert]
+tools = [tavily_search_tool, send_security_alert, write_to_database]
 tools_by_name = {tool.name: tool for tool in tools}
 model_with_tools = model.bind_tools(tools)
 
@@ -77,13 +112,18 @@ class MessagesState(TypedDict):
 
 def llm_call(state: dict):
     """The Core Decision-Making Hub for the SOC Analyst"""
+    current_calls = state.get("llm_calls", 0)
+
     sys_msg = SystemMessage(content="""You are a Senior SOC Analyst. 
     1. Analyze logs for SQLi, XSS, Brute Force, or Directory Traversal.
     2. Use 'tavily_search_tool' to investigate suspicious IPs or payloads.
     3. Once the analysis is complete and a threat is confirmed, use 'send_security_alert' to notify the admin.
-    4. If it's a false alarm, explain why and stop.""")
+    4. Once the analysis is complete and a threat is confirmed, use "write_to_database".                       
+    5. If it's a false alarm, explain why and stop.""")
     response = model_with_tools.invoke([sys_msg] + state["messages"])
-    return {"messages": [response]}
+    return {"messages": [response],
+            "llm_calls": current_calls+1
+            }
 
 
 
