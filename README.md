@@ -32,7 +32,7 @@ When a threat (SQLi, XSS, etc.) is detected, the agent triggers a deep investiga
 ###  3. Server & Database Logs
 All confirmed threats and their AI-generated forensic summaries are recorded in a structured MySQL database.
 
-<img src="images/image-2.png" width="400" alt="Database Logs">
+<img src="images/image-2.png" width="500" alt="Database Logs">
 
 *MySQL Database view of recorded security incidents and attack details.*
 
