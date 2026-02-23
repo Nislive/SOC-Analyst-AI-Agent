@@ -14,7 +14,7 @@ Below is the step-by-step execution flow of the agent, showing how it distinguis
 ###  1. Benign Analysis (Safe Path)
 When the AI Analyst determines a log entry is safe, it terminates the process immediately to save resources and avoid alert fatigue.
 
-<img src="images/image-4.png" width="800" alt="Benign Analysis">
+<img src="images/image-4.png" width="300" alt="Benign Analysis">
 
 *LangSmith trace showing the decision-making process for a harmless log entry.*
 
@@ -23,7 +23,7 @@ When the AI Analyst determines a log entry is safe, it terminates the process im
 ###  2. Malicious Analysis (Threat Path)
 When a threat (SQLi, XSS, etc.) is detected, the agent triggers a deep investigation, searching for IP reputation and payload signatures via Tavily.
 
-<img src="images/image-3.png" width="800" alt="Malicious Analysis">
+<img src="images/image-3.png" width="300" alt="Malicious Analysis">
 
 *LangSmith trace showing the agent conducting research and executing defensive tools.*
 
@@ -32,7 +32,7 @@ When a threat (SQLi, XSS, etc.) is detected, the agent triggers a deep investiga
 ###  3. Server & Database Logs
 All confirmed threats and their AI-generated forensic summaries are recorded in a structured MySQL database.
 
-<img src="images/image-2.png" width="800" alt="Database Logs">
+<img src="images/image-2.png" width="400" alt="Database Logs">
 
 *MySQL Database view of recorded security incidents and attack details.*
 
@@ -41,7 +41,7 @@ All confirmed threats and their AI-generated forensic summaries are recorded in 
 ###  4. Telegram Threat Alert
 The administrator receives an instant notification with the attack severity, analysis, and recommended actions.
 
-<img src="images/image-1.jpeg" width="400" alt="Telegram Alert">
+<img src="images/image-1.jpeg" width="300" alt="Telegram Alert">
 
 *Real-time security alert sent by the AI Agent to the administrator's Telegram.*
 
