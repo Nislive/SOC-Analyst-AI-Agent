@@ -32,6 +32,11 @@ def write_to_database(ip, type_of_attack, summary):
         my_cursor = mydb.cursor()
         my_cursor.execute("CREATE DATABASE IF NOT EXISTS security_logs_db")
         my_cursor.execute("USE security_logs_db")
+
+        if not getattr(write_to_database, "table_cleared", False):
+            my_cursor.execute("DROP TABLE IF EXISTS attack_logs")
+            write_to_database.table_cleared = True
+
         my_cursor.execute("""CREATE TABLE IF NOT EXISTS attack_logs (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -114,12 +119,16 @@ def llm_call(state: dict):
     """The Core Decision-Making Hub for the SOC Analyst"""
     current_calls = state.get("llm_calls", 0)
 
-    sys_msg = SystemMessage(content="""You are a Senior SOC Analyst. 
+    sys_msg = SystemMessage(content=
+    """
+    You are a Senior SOC Analyst. 
     1. Analyze logs for SQLi, XSS, Brute Force, or Directory Traversal.
     2. Use 'tavily_search_tool' to investigate suspicious IPs or payloads.
-    3. Once the analysis is complete and a threat is confirmed, use 'send_security_alert' to notify the admin.
-    4. Once the analysis is complete and a threat is confirmed, use "write_to_database".                       
-    5. If it's a false alarm, explain why and stop.""")
+    3. Once the analysis is complete, use 'send_security_alert' ONLY IF a real threat is confirmed. If the log is SAFE or BENIGN DO NOT trigger send_security_alert tool; simply provide a text-based explanation and finish.    
+    4. Once the analysis is complete, use 'write_to_database' ONLY IF a real threat is confirmed. If the log is SAFE or BENIGN DO NOT trigger write_to_database tool; simply provide a text-based explanation and finish.    
+    5. If both "send_security_alert" and "write_to_database" tools have already returned a success message, YOUR JOB IS DONE.
+    6. If it's a false alarm, explain why and stop.
+    """)
     response = model_with_tools.invoke([sys_msg] + state["messages"])
     return {"messages": [response],
             "llm_calls": current_calls+1
@@ -172,6 +181,7 @@ agent_builder.add_edge("tool_node", "llm_call")
 agent = agent_builder.compile()
 
 
+processed_ips = {}
 
 def start_soc_monitoring(log_file_path):
     print(f"SOC Agent is active and monitoring: {log_file_path}")
