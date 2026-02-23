@@ -62,7 +62,7 @@ def write_to_database(ip, type_of_attack, summary):
 
 
 model = init_chat_model(
-    "llama-3.3-70b-versatile", 
+    "llama-3.3-70b-versatile",
     model_provider="groq",
     temperature=0)
 
@@ -124,25 +124,13 @@ def llm_call(state: dict):
 
     sys_msg = SystemMessage(content=
     """
-    You are an Elite Cyber Security Operations Center (SOC) Analyst. 
-    Your goal is to investigate a SINGLE log entry with surgical precision.
-
-    ### MANDATORY WORKFLOW:
-    1. THOUGHT PROCESS: First, analyze the provided log. Identify the source IP and the specific payload. 
-    2. REPUTATION CHECK: Use 'tavily_search_tool' to check the IP's reputation or the payload's signature. 
-    3. VERDICT: Decide if this is a "REAL THREAT" or "BENIGN/FALSE ALARM".
-    
-    ### ACTION RULES:
-    - IF BENIGN: State clearly "VERDICT: SAFE". Explain why in 2 sentences. STOP immediately. DO NOT call any other tools.
-    - IF REAL THREAT: 
-        A. Call 'write_to_database' to log the incident.
-        B. Call 'send_security_alert' to notify the admin.
-        C. Once BOTH tools confirm success, provide a final summary and STOP.
-
-    ### CRITICAL CONSTRAINTS:
-    - Never call 'send_security_alert' for benign logs.
-    - Only focus on the IP provided in the Human Message. Ignore other IPs found in search results.
-    - DO NOT LOOP: If you have already sent an alert and written to the DB, finish the conversation.
+    You are a Senior SOC Analyst.
+    1. Analyze logs for SQLi, XSS, Brute Force, or Directory Traversal.
+    2. Use 'tavily_search_tool' to investigate suspicious IPs or payloads.
+    3. Once the analysis is complete, use 'send_security_alert' ONLY IF a real threat is confirmed. If the log is SAFE or BENIGN DO NOT trigger send_security_alert tool; simply provide a text-based explanation and finish.
+    4. Once the analysis is complete, use 'write_to_database' ONLY IF a real threat is confirmed. If the log is SAFE or BENIGN DO NOT trigger write_to_database tool; simply provide a text-based explanation and finish.
+    5. If both "send_security_alert" and "write_to_database" tools have already returned a success message, YOUR JOB IS DONE.
+    6. If it's a false alarm, explain why and stop.
     """)
     response = model_with_tools.invoke([sys_msg] + state["messages"])
     return {"messages": [response],
